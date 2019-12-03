@@ -37,7 +37,7 @@ unit LbRSA;
 interface
 
 uses
-  System.Types, System.Classes, System.SysUtils, LbBigInt, LbAsym, LbCipher, LbConst;
+  Types, Classes, SysUtils, LbBigInt, LbAsym, LbCipher, LbConst;
 
 const
   { cipher block size constants }                                    {!!.02}
@@ -210,7 +210,7 @@ type
 implementation
 
 uses
-  System.Math, LbUtils, LbBytes, LbProc;
+  Math, LbUtils, LbBytes, LbProc;
 
 { TLbRSAKey }
 
@@ -261,7 +261,10 @@ procedure TLbRSAKey.SetModulusAsString(Value : string);
 var
   Buf : array[Byte] of Byte;
 begin
+{$PUSH}
+{$WARN 5057 OFF}
   FillChar(Buf, SizeOf(Buf), #0);
+{$POP}
   HexToBuffer(Value, Buf, cLbAsymKeyBytes[FKeySize]);
   FModulus.CopyBuffer(Buf, cLbAsymKeyBytes[FKeySize]);
   FModulus.Trim;
@@ -278,7 +281,10 @@ procedure TLbRSAKey.SetExponentAsString(Value : string);
 var
   Buf : array[Byte] of Byte;
 begin
+{$PUSH}
+{$WARN 5057 OFF}
   FillChar(Buf, SizeOf(Buf), #0);
+{$POP}
   HexToBuffer(Value, Buf, cLbAsymKeyBytes[FKeySize]);
   FExponent.CopyBuffer(Buf, cLbAsymKeyBytes[FKeySize]);
   FExponent.Trim;
@@ -457,7 +463,7 @@ var
   SigBlock : TRSASignatureBlock;
 begin
   if Assigned(FOnGetSignature) then begin
-    FillChar(SigBlock, SizeOf(SigBlock), #0);
+    SigBlock := Default(TRSASignatureBlock);
     FOnGetSignature(Self, SigBlock);
     FSignature.CopyBuffer(SigBlock, cLbAsymKeyBytes[FKeySize]);      {!!.02}
     FSignature.Trim;
@@ -497,7 +503,10 @@ begin
     DoGetSignature;
     biBlock.Copy(FSignature);
     TRSA.RSAEncryptBigInt(biBlock, FPublicKey, bt01, False);              {!!.02}
+{$PUSH}
+{$WARN 5058 OFF}
     FillChar(HashDigest, DigestLen, #0);
+{$POP}
     if biBlock.Size < Integer(DigestLen) then                        {!!.05}
       biBlock.ToBuffer(HashDigest, biBlock.Size)
     else
@@ -599,13 +608,19 @@ begin
   case FHashMethod of
     hmMD5 :
       begin
+{$PUSH}
+{$WARN 5057 OFF}
         DecryptHash(MD5Digest1, SizeOf(TMD5Digest));
+{$POP}
         TMD5.HashMD5(MD5Digest2, Buf, BufLen);
         Result := CompareMem(@MD5Digest1, @MD5Digest2, SizeOf(TMD5Digest));
       end;
     hmSHA1 :
       begin
+{$PUSH}
+{$WARN 5057 OFF}
         DecryptHash(SHA1Digest1, SizeOf(TSHA1Digest));
+{$POP}
         TSHA1Encrypt.HashSHA1(SHA1Digest2, Buf, BufLen);
         Result := CompareMem(@SHA1Digest1, @SHA1Digest2, SizeOf(TSHA1Digest));
       end;
@@ -625,13 +640,19 @@ begin
   case FHashMethod of
     hmMD5 :
       begin
+{$PUSH}
+{$WARN 5057 OFF}
         DecryptHash(MD5Digest1, SizeOf(TMD5Digest));
+{$POP}
         TMD5Encrypt.FileHashMD5(MD5Digest2, AFileName);
         Result := CompareMem(@MD5Digest1, @MD5Digest2, SizeOf(TMD5Digest));
       end;
     hmSHA1 :
       begin
+{$PUSH}
+{$WARN 5057 OFF}
         DecryptHash(SHA1Digest1, SizeOf(TSHA1Digest));
+{$POP}
         TSHA1Encrypt.FileHashSHA1(SHA1Digest2, AFileName);
         Result := CompareMem(@SHA1Digest1, @SHA1Digest2, SizeOf(TSHA1Digest));
       end;
@@ -651,13 +672,19 @@ begin
   case FHashMethod of
     hmMD5 :
       begin
+{$PUSH}
+{$WARN 5057 OFF}
         DecryptHash(MD5Digest1, SizeOf(TMD5Digest));
+{$POP}
         TMD5Encrypt.StreamHashMD5(MD5Digest2, AStream);
         Result := CompareMem(@MD5Digest1, @MD5Digest2, SizeOf(TMD5Digest));
       end;
     hmSHA1 :
       begin
+{$PUSH}
+{$WARN 5057 OFF}
         DecryptHash(SHA1Digest1, SizeOf(TSHA1Digest));
+{$POP}
         TSHA1Encrypt.StreamHashSHA1(SHA1Digest2, AStream);
         Result := CompareMem(@SHA1Digest1, @SHA1Digest2, SizeOf(TSHA1Digest));
       end;
@@ -677,13 +704,19 @@ begin
   case FHashMethod of
     hmMD5 :
       begin
+{$PUSH}
+{$WARN 5057 OFF}
         DecryptHash(MD5Digest1, SizeOf(TMD5Digest));
+{$POP}
         TMD5Encrypt.StringHashMD5(MD5Digest2, GetBytes(AStr));
         Result := CompareMem(@MD5Digest1, @MD5Digest2, SizeOf(TMD5Digest));
       end;
     hmSHA1 :
       begin
+{$PUSH}
+{$WARN 5057 OFF}
         DecryptHash(SHA1Digest1, SizeOf(TSHA1Digest));
+{$POP}
         TSHA1Encrypt.StringHashSHA1(SHA1Digest2, GetBytes(AStr));
         Result := CompareMem(@SHA1Digest1, @SHA1Digest2, SizeOf(TSHA1Digest));
       end;
@@ -987,7 +1020,10 @@ begin
   end;
 
   { strip off padding bytes }
+{$PUSH}
+{$WARN 5057 OFF}
   biBlock.ToBuffer(Buf, i-1);
+{$POP}
   biBlock.CopyBuffer(Buf, i-1);
 end;
 

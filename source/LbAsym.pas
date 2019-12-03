@@ -36,11 +36,9 @@ unit LbAsym;
 interface
 
 uses
-  System.Classes, System.SysUtils, LbBigInt, LbClass, LbConst;
+  Classes, SysUtils, LbBigInt, LbClass, LbConst;
 
 type
-  PByte = ^Byte;
-
   TLbAsymKeySize = (aks128, aks256, aks512, aks768, aks1024);
 
 const
@@ -122,7 +120,7 @@ type
 implementation
 
 uses
-  LbCipher, LbProc, LbUtils;
+  LbCipher, LbProc;
 
 { TLbAsymmetricKey }
 
@@ -297,7 +295,7 @@ end;
 
 function TLbAsymmetricKey.GetBytes(const AString: string): TBytes;
 begin
-  Result := Encoding.GetBytes(AString);
+  Result := Encoding.GetBytes(UnicodeString(AString));
 end;
 
 procedure TLbAsymmetricKey.LoadFromStream(aStream : TStream);
@@ -308,7 +306,10 @@ var
   MemStream : TMemoryStream;
   BFKey : TKey128;
 begin
+{$PUSH}
+{$WARN 5057 OFF}
   FillChar(KeyBuf, SizeOf(KeyBuf), #0);
+{$POP}
   aStream.Position := 0;
 
   { decrypt stream first if passphrase in not empty }
@@ -343,7 +344,10 @@ var
   MemStream : TMemoryStream;
   BFKey : TKey128;
 begin
+{$PUSH}
+{$WARN 5057 OFF}
   FillChar(KeyBuf, SizeOf(KeyBuf), #0);
+{$POP}
   Len := CreateASNKey(@KeyBuf, SizeOf(KeyBuf));
 
   { encrypt buffer first if passphrase in not empty }

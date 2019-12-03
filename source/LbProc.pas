@@ -37,12 +37,13 @@ unit LbProc;
 interface
 
 uses
-  System.Classes, System.SysUtils, LbCipher;
+  Classes, SysUtils, LbCipher;
 
 type
   ECipherException = class(Exception);
 
-  TProgressProc = TProc<Integer, Integer>;                                      {!!.06a}
+  //TProgressProc = TProc<Integer, Integer>;                                      {!!.06a}
+  TProgressProc = procedure(Arg1: Integer; Arg2: Integer);
 
   TLbProgress = record
   strict private class var
@@ -108,14 +109,14 @@ type
 
   TMD5Encrypt = class(TMD5)
   public
-    class procedure FileHashMD5(var Digest : TMD5Digest; const AFileName : string); static;
-    class procedure StreamHashMD5(var Digest : TMD5Digest; AStream : TStream); static;
+    class procedure FileHashMD5(out Digest : TMD5Digest; const AFileName : string); static;
+    class procedure StreamHashMD5(out Digest : TMD5Digest; AStream : TStream); static;
   end;
 
   TSHA1Encrypt = class(TSHA1)
   public
-    class procedure FileHashSHA1(var Digest : TSHA1Digest; const AFileName : string); static;
-    class procedure StreamHashSHA1(var Digest : TSHA1Digest; AStream : TStream); static;
+    class procedure FileHashSHA1(out Digest : TSHA1Digest; const AFileName : string); static;
+    class procedure StreamHashSHA1(out Digest : TSHA1Digest; AStream : TStream); static;
   end;
 
 implementation
@@ -178,7 +179,10 @@ begin
 
   {process all except the last block}
   for I := 1 to BlockCount - 1 do begin
+{$PUSH}
+{$WARN 5057 OFF}
     if InStream.Read(Block, SizeOf(Block)) <> SizeOf(Block) then
+{$POP}
       raise ECipherException.Create(SInvalidFileFormat);
     EncryptBF(Context, Block, Encrypt);
     OutStream.Write(Block, SizeOf(Block));
@@ -234,8 +238,8 @@ begin
 
   if Encrypt then begin
     {set up an initialization vector (IV)}
-    Block[0] := TThread.GetTickCount;
-    Block[1] := TThread.GetTickCount;
+    Block[0] := TThread.GetTickCount64;
+    Block[1] := TThread.GetTickCount64;
     EncryptBF(Context, Block, Encrypt);
     OutStream.Write(Block, SizeOf(Block));
     IV := Block;
@@ -357,7 +361,10 @@ begin
 
   {process all except the last block}
   for I := 1 to BlockCount - 1 do begin
+{$PUSH}
+{$WARN 5057 OFF}
     if InStream.Read(Block, SizeOf(Block)) <> SizeOf(Block) then
+{$POP}
       raise ECipherException.Create(SInvalidFileFormat);
     EncryptDES(Context, Block);
     OutStream.Write(Block, SizeOf(Block));
@@ -413,10 +420,10 @@ begin
 
   if Encrypt then begin
     {set up an initialization vector (IV)}
-    Block[0] := TThread.GetTickCount;
-    Block[1] := TThread.GetTickCount;
-    Block[2] := TThread.GetTickCount;
-    Block[3] := TThread.GetTickCount;
+    Block[0] := TThread.GetTickCount64;
+    Block[1] := TThread.GetTickCount64;
+    Block[2] := TThread.GetTickCount64;
+    Block[3] := TThread.GetTickCount64;
     EncryptDES(Context, Block);
     OutStream.Write(Block, SizeOf(Block));
     IV := Block;
@@ -536,7 +543,10 @@ begin
 
   {process all except the last block}
   for I := 1 to BlockCount - 1 do begin
+{$PUSH}
+{$WARN 5057 OFF}
     if InStream.Read(Block, SizeOf(Block)) <> SizeOf(Block) then
+{$POP}
       raise ECipherException.Create(SInvalidFileFormat);
     EncryptTripleDES(Context, Block);
     OutStream.Write(Block, SizeOf(Block));
@@ -592,9 +602,9 @@ begin
 
   if Encrypt then begin
     {set up an initialization vector (IV)}
-    Block[1] := TThread.GetTickCount;
-    Block[2] := TThread.GetTickCount;
-    Block[3] := TThread.GetTickCount;
+    Block[1] := TThread.GetTickCount64;
+    Block[2] := TThread.GetTickCount64;
+    Block[3] := TThread.GetTickCount64;
 
     EncryptTripleDES(Context, Block);
     OutStream.Write(Block, SizeOf(Block));
@@ -717,7 +727,10 @@ begin
 
   {process all except the last block}
   for I := 1 to BlockCount - 1 do begin
+{$PUSH}
+{$WARN 5057 OFF}
     if InStream.Read(Block, SizeOf(Block)) <> SizeOf(Block) then
+{$POP}
       raise ECipherException.Create(SInvalidFileFormat);
     EncryptLBC(Context, Block);
     OutStream.Write(Block, SizeOf(Block));
@@ -773,10 +786,10 @@ begin
 
   if Encrypt then begin
     {set up an initialization vector (IV)}
-    Block[0] := TThread.GetTickCount;
-    Block[1] := TThread.GetTickCount;
-    Block[2] := TThread.GetTickCount;
-    Block[3] := TThread.GetTickCount;
+    Block[0] := TThread.GetTickCount64;
+    Block[1] := TThread.GetTickCount64;
+    Block[2] := TThread.GetTickCount64;
+    Block[3] := TThread.GetTickCount64;
     EncryptLBC(Context, Block);
     OutStream.Write(Block, SizeOf(Block));
     IV := Block;
@@ -893,7 +906,10 @@ begin
 
   {process all except the last block}
   for I := 1 to BlockCount - 1 do begin
+{$PUSH}
+{$WARN 5057 OFF}
     if InStream.Read(Block, SizeOf(Block)) <> SizeOf(Block) then
+{$POP}
       raise ECipherException.Create(SInvalidFileFormat);
     EncryptLQC(Key, Block, Encrypt);
     OutStream.Write(Block, SizeOf(Block));
@@ -946,8 +962,8 @@ begin
 
   if Encrypt then begin
     {set up an initialization vector (IV)}
-    Block[0] := TThread.GetTickCount;
-    Block[1] := TThread.GetTickCount;
+    Block[0] := TThread.GetTickCount64;
+    Block[1] := TThread.GetTickCount64;
     EncryptLQC(Key, Block, Encrypt);
     OutStream.Write(Block, SizeOf(Block));
     IV := Block;
@@ -1030,7 +1046,10 @@ begin
     OutStream := TFileStream.Create(OutFile, fmCreate);
     try
       repeat
+{$PUSH}
+{$WARN 5057 OFF}
         BytesRead := InStream.Read(Buf, SizeOf(Buf));
+{$POP}
         if BytesRead > 0 then begin
           EncryptLSC(Context, Buf, BytesRead);
           OutStream.WriteBuffer(Buf, BytesRead);
@@ -1066,7 +1085,10 @@ begin
     OutStream := TFileStream.Create(OutFile, fmCreate);
     try
       repeat
+{$PUSH}
+{$WARN 5057 OFF}
         BytesRead := InStream.Read(Buf, SizeOf(Buf));
+{$POP}
         if BytesRead > 0 then begin
           EncryptRNG32(Context, Buf, BytesRead);
           OutStream.WriteBuffer(Buf, BytesRead);
@@ -1100,7 +1122,10 @@ begin
     OutStream := TFileStream.Create(OutFile, fmCreate);
     try
       repeat
+{$PUSH}
+{$WARN 5057 OFF}
         BytesRead := InStream.Read(Buf, SizeOf(Buf));
+{$POP}
         if BytesRead > 0 then begin
           EncryptRNG64(Context, Buf, BytesRead);
           OutStream.WriteBuffer(Buf, BytesRead);
@@ -1175,7 +1200,10 @@ begin
 
   {process all except the last block}
   for I := 1 to BlockCount - 1 do begin
+{$PUSH}
+{$WARN 5057 OFF}
     if InStream.Read(Block, SizeOf(Block)) <> SizeOf(Block) then
+{$POP}
       raise ECipherException.Create(SInvalidFileFormat);
     EncryptRDL(Context, Block);
     OutStream.Write(Block, SizeOf(Block));
@@ -1231,8 +1259,8 @@ begin
 
   if Encrypt then begin
     {set up an initialization vector (IV)}
-    Block[0] := TThread.GetTickCount;
-    Block[1] := TThread.GetTickCount;
+    Block[0] := TThread.GetTickCount64;
+    Block[1] := TThread.GetTickCount64;
     EncryptRDL(Context, Block);
     OutStream.Write(Block, SizeOf(Block));
     IV := Block;
@@ -1302,7 +1330,7 @@ end;
 
 { TMD5Encrypt }
 
-class procedure TMD5Encrypt.FileHashMD5(var Digest : TMD5Digest; const AFileName : string);
+class procedure TMD5Encrypt.FileHashMD5(out Digest : TMD5Digest; const AFileName : string);
 var
   FS : TFileStream;
 begin
@@ -1314,14 +1342,17 @@ begin
   end;
 end;
 
-class procedure TMD5Encrypt.StreamHashMD5(var Digest : TMD5Digest; AStream : TStream);
+class procedure TMD5Encrypt.StreamHashMD5(out Digest : TMD5Digest; AStream : TStream);
 var
   BufSize : Cardinal;
   Buf : array[0..1023] of Byte;
   Context : TMD5Context;
 begin
   InitMD5(Context);
+{$PUSH}
+{$WARN 5057 OFF}
   BufSize := AStream.Read(Buf, SizeOf(Buf));
+{$POP}
   while (BufSize > 0) do begin
     UpdateMD5(Context, Buf, BufSize);
     BufSize := AStream.Read(Buf, SizeOf(Buf));
@@ -1331,7 +1362,7 @@ end;
 
 { TSHA1Encrypt }
 
-class procedure TSHA1Encrypt.FileHashSHA1(var Digest : TSHA1Digest; const AFileName : string);
+class procedure TSHA1Encrypt.FileHashSHA1(out Digest : TSHA1Digest; const AFileName : string);
 var
   FS : TFileStream;
 begin
@@ -1343,14 +1374,17 @@ begin
   end;
 end;
 
-class procedure TSHA1Encrypt.StreamHashSHA1(var Digest : TSHA1Digest; AStream : TStream);
+class procedure TSHA1Encrypt.StreamHashSHA1(out Digest : TSHA1Digest; AStream : TStream);
 var
   BufSize : Cardinal;
   Buf : array[0..1023] of Byte;
   Context : TSHA1Context;
 begin
   InitSHA1(Context);
+{$PUSH}
+{$WARN 5057 OFF}
   BufSize := AStream.Read(Buf, SizeOf(Buf));
+{$POP}
   while (BufSize > 0) do begin
     UpdateSHA1(Context, Buf, BufSize);
     BufSize := AStream.Read(Buf, SizeOf(Buf));

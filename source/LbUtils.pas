@@ -36,7 +36,7 @@ unit LbUtils;
 interface
 
 uses
-  System.Types, System.SysUtils;
+  Types, SysUtils;
 
 type
   PDWord = ^DWord;
@@ -47,7 +47,7 @@ function HexToBuffer(const Hex : string; var Buf; BufSize : Cardinal) : Boolean;
 implementation
 
 uses
-  System.Math, System.Character;
+  Math, Character;
 
 { -------------------------------------------------------------------------- }
 function BufferToHex(const Buf; BufSize : Cardinal) : string;
@@ -70,7 +70,7 @@ begin
   Str := '';
   for cChar in Hex do
   begin
-    if cChar.ToUpper.IsInArray(['0','1','2','3','4','5','6','7','8','9', 'A','B','C','D','E','F']) then
+    if ToUpper(cChar) in ['0','1','2','3','4','5','6','7','8','9', 'A','B','C','D','E','F'] then
       Str := Str + cChar;
   end;
 

@@ -34,7 +34,7 @@ unit LbRandom;
 interface
 
 uses
-  System.Types, System.Classes, System.SysUtils, System.Math, LbCipher;
+  Types, Classes, SysUtils, LbCipher;
 
 { TLbRandomGenerator }
 type
@@ -87,7 +87,10 @@ var
 begin
   lcg := TLbRanLFS.Create;
   try
+{$PUSH}
+{$WARN 5057 OFF}
     lcg.FillBuf( RandomSeed, SizeOf( RandomSeed ));
+{$POP}
     for i := 0 to 4 do begin
       TMD5.InitMD5( Context );
       TMD5.UpdateMD5( Context, Seed, SizeOf( Seed ));
@@ -104,7 +107,7 @@ var
   Context : TMD5Context;
   TmpDig : TMD5Digest;
   Index : DWORD;
-  m : integer;
+  m : DWORD;
   SizeOfTmpDig : integer;
 begin
   SizeOfTmpDig := SizeOf( TmpDig );

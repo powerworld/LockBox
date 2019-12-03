@@ -42,7 +42,4 @@
 {$W-} {Windows Stack Frame}
 {$X+} {Extended Syntax}
 
-
-
-
-
+{$mode delphi}{$H+}

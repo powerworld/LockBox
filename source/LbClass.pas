@@ -39,14 +39,14 @@ unit LbClass;
 interface
 
 uses
-  System.Classes, System.SysUtils, LbCipher;
+  Classes, SysUtils, LbCipher;
 
 type
   TLBBaseComponent = class(TLBBase)
   strict private
     FEncoding: TEncoding;
     function GetVersion: string;
-    procedure SetVersion(const Value: string);
+    //procedure SetVersion(const Value: string);
   strict protected
     function GetBytes(const AString: string): TBytes;
     function GetString(const ABytes: TBytes): string;
@@ -54,7 +54,7 @@ type
     constructor Create(AOwner: TComponent); override;
     property Encoding: TEncoding read FEncoding write FEncoding;
   published
-    property Version: string read GetVersion write SetVersion stored False;
+    property Version: string read GetVersion {write SetVersion} stored False;
   end;
 
   TLbCipherMode = (cmECB, cmCBC);
@@ -304,12 +304,12 @@ end;
 
 function TLBBaseComponent.GetBytes(const AString: string): TBytes;
 begin
-  Result := Encoding.GetBytes(AString);
+  Result := Encoding.GetBytes(UnicodeString(AString));
 end;
 
 function TLBBaseComponent.GetString(const ABytes: TBytes): string;
 begin
-  Result := Encoding.GetString(ABytes);
+  Result := string(Encoding.GetString(ABytes));
 end;
 
 function TLBBaseComponent.GetVersion: string;
@@ -317,9 +317,9 @@ begin
   Result := sLbVersion;
 end;
 
-procedure TLBBaseComponent.SetVersion(const Value: string);
-begin
-end;
+//procedure TLBBaseComponent.SetVersion(const Value: string);
+//begin
+//end;
 
 { TLbCipher }
 
@@ -370,6 +370,8 @@ begin
   case CipherMode of
     cmECB : TBlowfishBytes.BFEncryptFile(InFile, OutFile, FKey, False);
     cmCBC : TBlowfishBytes.BFEncryptFileCBC(InFile, OutFile, FKey, False);
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -378,6 +380,8 @@ begin
   case CipherMode of
     cmECB : TBlowfishBytes.BFEncryptStream(InStream, OutStream, FKey, False);
     cmCBC : TBlowfishBytes.BFEncryptStreamCBC(InStream, OutStream, FKey, False);
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -386,6 +390,8 @@ begin
   case CipherMode of
     cmECB : Result := GetString(TBlowfishBytes.BFEncryptBytesEx(GetBytes(InString), FKey, False));
     cmCBC : Result := GetString(TBlowfishBytes.BFEncryptBytesCBCEx(GetBytes(InString), FKey, False));
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -394,6 +400,8 @@ begin
   case CipherMode of
     cmECB : TBlowfishBytes.BFEncryptFile(InFile, OutFile, FKey, True);
     cmCBC : TBlowfishBytes.BFEncryptFileCBC(InFile, OutFile, FKey, True);
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -402,6 +410,8 @@ begin
   case CipherMode of
     cmECB : TBlowfishBytes.BFEncryptStream(InStream, OutStream, FKey, True);
     cmCBC : TBlowfishBytes.BFEncryptStreamCBC(InStream, OutStream, FKey, True);
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -410,6 +420,8 @@ begin
   case CipherMode of
     cmECB : Result := GetString(TBlowfishBytes.BFEncryptBytesEx(GetBytes(InString), FKey, True));
     cmCBC : Result := GetString(TBlowfishBytes.BFEncryptBytesCBCEx(GetBytes(InString), FKey, True));
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -449,6 +461,8 @@ begin
   case CipherMode of
     cmECB : TDESBytes.DESEncryptFile(InFile, OutFile, FKey, False);
     cmCBC : TDESBytes.DESEncryptFileCBC(InFile, OutFile, FKey, False);
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -457,6 +471,8 @@ begin
   case CipherMode of
     cmECB : TDESBytes.DESEncryptStream(InStream, OutStream, FKey, False);
     cmCBC : TDESBytes.DESEncryptStreamCBC(InStream, OutStream, FKey, False);
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -465,6 +481,8 @@ begin
   case CipherMode of
     cmECB : Result := GetString(TDESBytes.DESEncryptBytesEx(GetBytes(InString), FKey, False));
     cmCBC : Result := GetString(TDESBytes.DESEncryptBytesCBCEx(GetBytes(InString), FKey, False));
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -473,6 +491,8 @@ begin
   case CipherMode of
     cmECB : TDESBytes.DESEncryptFile(InFile, OutFile, FKey, True);
     cmCBC : TDESBytes.DESEncryptFileCBC(InFile, OutFile, FKey, True);
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -481,6 +501,8 @@ begin
   case CipherMode of
     cmECB : TDESBytes.DESEncryptStream(InStream, OutStream, FKey, True);
     cmCBC : TDESBytes.DESEncryptStreamCBC(InStream, OutStream, FKey, True);
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -489,6 +511,8 @@ begin
   case CipherMode of
     cmECB : Result := GetString(TDESBytes.DESEncryptBytesEx(GetBytes(InString), FKey, True));
     cmCBC : Result := GetString(TDESBytes.DESEncryptBytesCBCEx(GetBytes(InString), FKey, True));
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -542,6 +566,8 @@ begin
   case CipherMode of
     cmECB : Result := GetString(TDESBytes.TripleDESEncryptBytesEx(GetBytes(InString), FKey, False));
     cmCBC : Result := GetString(TDESBytes.TripleDESEncryptBytesCBCEx(GetBytes(InString), FKey, False));
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -550,6 +576,8 @@ begin
   case CipherMode of
     cmECB : TDESBytes.TripleDESEncryptFile(InFile, OutFile, FKey, True);
     cmCBC : TDESBytes.TripleDESEncryptFileCBC(InFile, OutFile, FKey, True);
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -558,6 +586,8 @@ begin
   case CipherMode of
     cmECB : TDESBytes.TripleDESEncryptStream(InStream, OutStream, FKey, True);
     cmCBC : TDESBytes.TripleDESEncryptStreamCBC(InStream, OutStream, FKey, True);
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -566,6 +596,8 @@ begin
   case CipherMode of
     cmECB : Result := GetString(TDESBytes.TripleDESEncryptBytesEx(GetBytes(InString), FKey, True));
     cmCBC : Result := GetString(TDESBytes.TripleDESEncryptBytesCBCEx(GetBytes(InString), FKey, True));
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -611,6 +643,8 @@ begin
   case CipherMode of
     cmECB : TRDLBytes.RDLEncryptFile(InFile, OutFile, FKey, FKeySizeBytes, False);
     cmCBC : TRDLBytes.RDLEncryptFileCBC(InFile, OutFile, FKey, FKeySizeBytes, False);
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -619,6 +653,8 @@ begin
   case CipherMode of
     cmECB : TRDLBytes.RDLEncryptStream(InStream, OutStream, FKey, FKeySizeBytes, False);
     cmCBC : TRDLBytes.RDLEncryptStreamCBC(InStream, OutStream, FKey, FKeySizeBytes, False);
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -627,6 +663,8 @@ begin
   case CipherMode of
     cmECB : Result := GetString(TRDLBytes.RDLEncryptBytesEx(GetBytes(InString), FKey, FKeySizeBytes, False));
     cmCBC : Result := GetString(TRDLBytes.RDLEncryptBytesCBCEx(GetBytes(InString), FKey, FKeySizeBytes, False));
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -635,6 +673,8 @@ begin
   case CipherMode of
     cmECB : TRDLBytes.RDLEncryptFile(InFile, OutFile, FKey, FKeySizeBytes, True);
     cmCBC : TRDLBytes.RDLEncryptFileCBC(InFile, OutFile, FKey, FKeySizeBytes, True);
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -643,6 +683,8 @@ begin
   case CipherMode of
     cmECB : TRDLBytes.RDLEncryptStream(InStream, OutStream, FKey, FKeySizeBytes, True);
     cmCBC : TRDLBytes.RDLEncryptStreamCBC(InStream, OutStream, FKey, FKeySizeBytes, True);
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 
@@ -651,6 +693,8 @@ begin
   case CipherMode of
     cmECB : Result := GetString(TRDLBytes.RDLEncryptBytesEx(GetBytes(InString), FKey, FKeySizeBytes, True));
     cmCBC : Result := GetString(TRDLBytes.RDLEncryptBytesCBCEx(GetBytes(InString), FKey, FKeySizeBytes, True));
+  else
+    raise Exception.Create('Unexpected CipherMode!');
   end;
 end;
 

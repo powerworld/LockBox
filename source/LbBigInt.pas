@@ -36,7 +36,7 @@ unit LbBigInt;
 interface
 
 uses
-  System.Types, System.SysUtils, LbRandom;
+  Types, SysUtils, LbRandom;
 
 const
   cLESS_THAN    = shortInt(-1);
@@ -146,7 +146,7 @@ end;
 implementation
 
 uses
-  System.Math, LbUtils, LbConst;
+  Math, LbUtils, LbConst;
 
 const { misc local constants }
   cBYTE_POSSIBLE_VALUES  = 256;
@@ -156,22 +156,16 @@ const { misc local constants }
   cDEFAULT_USED          = 0;
   cAPPEND_ARRAY          = 0;
   cPREPEND_ARRAY         = 1;
-  cDEFAULT_MAX_PRECISION = 256;
 
 
 const { simple prime table }
   cTotalSimplePrimes      = (258 * 8);
-  cTotalSimpleBytePrimes  = 53;  { %80 elimination }
   cTotalSimple2KPrimes    = 303;
 
 type
   pBiByteArray = ^TBiByteArray;
-  pBiWordArray = ^TBiWordArray;
 //  TBiByteArray = array[0..65535] of Byte;
   TBiByteArray = array[0..pred(maxint)] of Byte;
-  TBiWordArray = array[0..pred(maxint div 2 )] of word;
-const
-  cMaxBigIntSize = SizeOf( TByteArray );
 
 const
   { source :
@@ -464,9 +458,9 @@ const
 
 
 { == Local LbInteger routines ============================================= }
-procedure LbBiInit(var N1 : LbInteger; Precision : Integer);
+procedure LbBiInit(out N1 : LbInteger; Precision : Integer);
 begin
-  FillChar(N1, SizeOf(LbInteger), $00);
+  N1 := Default(LbInteger);
 
   if (Precision > 0) then
     N1.IntBuf.dwLen := Precision
@@ -543,7 +537,7 @@ begin
   LbBiTrimSigZeros(N1);  
 end;
 { ------------------------------------------------------------------- }
-procedure LbBiFindLargestUsed(N1 : LbInteger; N2 : LbInteger; var count : integer); {!!03}
+procedure LbBiFindLargestUsed(N1 : LbInteger; N2 : LbInteger; out count : integer); {!!03}
 begin
   if (N1.dwUsed >= N2.dwUsed) then
     Count := N1.dwUsed
@@ -560,8 +554,7 @@ begin
   end;
 end;
 { ------------------------------------------------------------------- }
-procedure LbBiPrepare(N1 : LbInteger; N2 : LbInteger;
-                       var N3 : LbInteger);
+procedure LbBiPrepare(var N3 : LbInteger);
 begin
   { if pointer does not point at data then we make some }
   if (not(assigned(N3.IntBuf.pBuf))) then
@@ -843,7 +836,7 @@ var
 begin
   LbBiVerify(N1);
   LbBiVerify(N2);
-  LbBiPrepare(N1, N2, NOR);
+  LbBiPrepare(NOR);
 
   LbBiAddByte(NOR, cPREPEND_ARRAY, $00);
   LbBiFindLargestUsed(N1, N2, count);
@@ -885,7 +878,7 @@ var
 begin
   LbBiVerify(N1);
   LbBiVerify(N2);
-  LbBiPrepare(N1, N2, NXOR);
+  LbBiPrepare(NXOR);
 
   LbBiAddByte(NXOR, cPREPEND_ARRAY, $00);
   LbBiFindLargestUsed(N1, N2, count);
@@ -1010,7 +1003,7 @@ begin
     if (N2.dwUsed < succ(cnt)) then
       tmp := tmp - Borrow
     else
-      tmp := tmp - (pBiByteArray(N2.IntBuf.pBuf)[cnt] + Borrow);
+      tmp := tmp - integer(pBiByteArray(N2.IntBuf.pBuf)[cnt] + Borrow);
 
     if (tmp < 0) then begin
       inc(tmp, cBYTE_POSSIBLE_VALUES);
@@ -1288,7 +1281,7 @@ end;
 { ------------------------------------------------------------------- }
 procedure LbBiDivByDigitBase(N1 : LbInteger; N2 : byte;
                               var quotient : LbInteger;
-                              var remainder : byte);
+                              out remainder : byte);
 var
   factor : byte;
   c : Integer;
@@ -1338,7 +1331,7 @@ begin
     Carry := 0;
     tmp := pred(lclDVD.dwUsed);
     for c := tmp downto 0 do begin
-      sigDivd := (Carry shl 8) or (integer(pBiByteArray(lclDVD.IntBuf.pBuf)[c])); {!!03}
+      sigDivd := (Carry shl 8) or Longword(integer(pBiByteArray(lclDVD.IntBuf.pBuf)[c])); {!!03}
       if (SigDivd < divisor) then begin
         Carry := SigDivd;
         dec(plc);
@@ -1378,7 +1371,7 @@ end;
 { ------------------------------------------------------------------- }
 procedure LbBiDivByDigit(N1 : LbInteger; N2 : byte;
                           var quotient : LbInteger;
-                          var remainder : byte);
+                          out remainder : byte);
 begin
   LbBiDivByDigitBase(N1, N2, quotient, remainder);
   quotient.bSign := N1.bSign;
@@ -1386,7 +1379,7 @@ end;
 { ------------------------------------------------------------------- }
 procedure LbBiDivByDigitInPlace(var N1 : LbInteger;
                                       N2 : byte;
-                                  var remainder : byte);
+                                  out remainder : byte);
 var
   tmp : LbInteger;
   precis : Integer;
@@ -1791,7 +1784,7 @@ begin
   for i := 1 to N2.dwUsed do
   begin
     byt_ptr^ := LbBiReverseBits(byt_ptr^);
-    Inc(NativeInt(byt_ptr));
+    Inc(byt_ptr);
   end;
 end;
 { ------------------------------------------------------------------- }
@@ -2041,7 +2034,10 @@ begin
   RG := TLbRandomGenerator.create;
   try
     repeat
+{$PUSH}
+{$WARN 5057 OFF}
       RG.RandomBytes(x, SizeOf(x));
+{$POP}
       x := x and $0FFF;
     until(x > 3) and (x <= High(SimplePrimes));
     LbBiAddWord(N1, cPREPEND_ARRAY, SimplePrimes[x]);
@@ -2081,9 +2077,9 @@ begin
 
   LbBiVerify(u);
   LbBiVerify(v);
-  LbBiPrepare(u, v, u1);
-  LbBiPrepare(u, v, u2);
-  LbBiPrepare(u, v, GCD);
+  LbBiPrepare(u1);
+  LbBiPrepare(u2);
+  LbBiPrepare(GCD);
 
   LbBiClear(u1);
   LbBiClear(u2);
@@ -2185,7 +2181,7 @@ var
 begin
   LbBiVerify(e);
   LbBiVerify(_mod);
-  LbBiPrepare(e, _mod, d);
+  LbBiPrepare(d);
 
   LbBiInit(u, cUSE_DEFAULT_PRECISION);
   LbBiInit(v, cUSE_DEFAULT_PRECISION);

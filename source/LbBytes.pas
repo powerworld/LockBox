@@ -389,7 +389,10 @@ begin
     O := 0;
     I := 0;
 
+{$PUSH}
+{$WARN 5057 OFF}
     Count := InStream.Read(InBuf, SizeOf(InBuf));
+{$POP}
     if (Count = 0) then
       Break;
 
@@ -427,10 +430,16 @@ var
   OutBuf : array[0..62] of Byte;
   Temp : Byte;
 begin
+{$PUSH}
+{$WARN 5057 OFF}
   FillChar(OutBuf, Sizeof(OutBuf), #0);
+{$POP}
 
   repeat
+{$PUSH}
+{$WARN 5057 OFF}
     Count := InStream.Read(InBuf, SizeOf(InBuf));
+{$POP}
     if Count = 0 then Break;
     I := 1;
     O := 0;
